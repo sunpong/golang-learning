@@ -3,42 +3,61 @@ package main
 import (
 	"errors"
 	"fmt"
+	"reflect"
 )
 
-var errDivisionByZero = errors.New("division by zero")
+// 自定义 error
+// 1. 使用 errors 中的new，直接return errors.New("erro msg")
+// 2. fmt.Errorf()
+// 3. 使用结构体去实现
 
-func div(dividend, divisor int) (int, error) {
-	if divisor == 0 {
-		return 0, errDivisionByZero
+var err1 error = errors.New("error msg1")
+var err2 error = fmt.Errorf("error msg2")
+
+
+func test1() error {
+	return err1
+}
+
+func test2() error {
+	return err2
+}
+
+
+type ErrStruct struct {
+	Code int
+	Msg string
+}
+
+func (e *ErrStruct) Error() string {
+	return e.Msg
+}
+
+func New(code int, mgs string)  *ErrStruct {
+	return &ErrStruct{
+		Code: code,
+		Msg: mgs,
 	}
-	return dividend / divisor, nil
 }
 
-type ParseError struct {
-	Filename string // 文件名
-	Line     int    // 行号
-}
-
-// 实现error接口，返回错误描述
-func (e *ParseError) Error() string {
-	return fmt.Sprintf("%s:%d", e.Filename, e.Line)
-}
-
-// 创建一些解析错误
-func newParseError(filename string, line int) error {
-	return &ParseError{filename, line}
-}
 func main() {
-	var e error
-	// 创建一个错误实例，包含文件名和行号
-	e = newParseError("main.go", 1)
-	// 通过error接口查看错误描述
-	fmt.Println(e.Error())
-	// 根据错误接口具体的类型，获取详细错误信息
-	switch detail := e.(type) {
-	case *ParseError: // 这是一个解析错误
-		fmt.Printf("Filename: %s Line: %d\n", detail.Filename, detail.Line)
-	default: // 其他类型的错误
-		fmt.Println("other error")
+
+	err1 := test1()
+	if err1 != nil {
+		fmt.Println(err1.Error())
+		fmt.Println(reflect.TypeOf(err1))
 	}
+
+	err2 := test2()
+	if err2 != nil {
+		fmt.Println(err2.Error())
+		fmt.Println(reflect.TypeOf(err2))
+	}
+
+    err3 := New(404, "not fould test3")
+    if err3 != nil {
+        fmt.Println(err3.Error())
+		fmt.Println(err3.Code)
+	    fmt.Println(reflect.TypeOf(err3))
+    }
 }
