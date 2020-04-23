@@ -23,7 +23,6 @@ func test2() error {
 	return err2
 }
 
-
 type ErrStruct struct {
 	Code int
 	Msg string
