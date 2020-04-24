@@ -39,6 +39,11 @@ func New(code int, mgs string)  *ErrStruct {
 	}
 }
 
+func Test4() error {
+	return New(444, "not fould test4")
+
+}
+
 func main() {
 
 	err1 := test1()
@@ -59,4 +64,9 @@ func main() {
 		fmt.Println(err3.Code)
 	    fmt.Println(reflect.TypeOf(err3))
     }
+
+    err4 := Test4()
+    if err4 != nil {
+		fmt.Println(err4.Error())
+	}
 }
