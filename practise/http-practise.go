@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func init() {
@@ -15,6 +16,7 @@ func init() {
 func main() {
 	client := &http.Client{}
 
+	t1 := time.Now()
 	// 发送一个请求
 	req, err := http.NewRequest("POST", "http://163.com/", strings.NewReader("key=value"))
 
@@ -36,5 +38,7 @@ func main() {
 
 	data, err := ioutil.ReadAll(resp.Body)
 	fmt.Print(string(data))
+
+	fmt.Println(time.Now().Sub(t1))
 
 }
