@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-var log=logrus.New()
+var log = logrus.New()
 
 func main() {
 	//用日志实例的方式使用日志
