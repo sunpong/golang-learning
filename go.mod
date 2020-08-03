@@ -3,6 +3,7 @@ module golang-learning
 go 1.14
 
 require (
+	github.com/emicklei/go-restful v0.0.0-20170410110728-ff4f55a20633
 	github.com/jinzhu/gorm v1.9.12
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/cobra v1.0.0

@@ -1,14 +1,28 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
-func main() {
-	var a = "1"
-	//fmt.Println(int32(a))
-    for _, v := range a {
-    	fmt.Println(v)
+func Test() {
+	for i:=0; i<10;i++ {
+		fmt.Println(i)
+		if i == 5 {
+			panic("sss")
+		}
 	}
-
 }
 
 
+func main()  {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("----")
+			fmt.Println(r)
+		}
+	}()
+	 Test()
+	fmt.Println("aaa")
+    time.Sleep(10 * time.Second)
+}
