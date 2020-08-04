@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 
@@ -9,12 +11,17 @@ import (
 )
 
 type User struct {
-	Id, Name string
+	Id, Name, Age string
 }
 
 type UserResource struct {
 	// normally one would use DAO (data access object)
 	users map[string]User
+}
+
+type RequestBody struct {
+	Name string
+	Age string
 }
 
 func (u UserResource) Register(container *restful.Container) {
@@ -28,13 +35,16 @@ func (u UserResource) Register(container *restful.Container) {
 		Produces(restful.MIME_JSON, restful.MIME_XML) // you can specify this per route as well
 
 	// 添加路由： GET /{user-id} --> u.findUser
+	// 带括号的表示变量，不带的是固定路径，如果不写 则404
+	//ws.Route(ws.GET("/{user-id}/test/{user-name}").To(u.findUser))
 	ws.Route(ws.GET("/{user-id}").To(u.findUser))
 
+
 	// 添加路由： POST / --> u.updateUser
-	ws.Route(ws.POST("").To(u.updateUser))
+	ws.Route(ws.POST("").To(u.createUser))
 
 	// 添加路由： PUT /{user-id} --> u.createUser
-	ws.Route(ws.PUT("/{user-id}").To(u.createUser))
+	ws.Route(ws.PUT("/{user-id}").To(u.updateUser))
 
 	// 添加路由： DELETE /{user-id} --> u.removeUser
 	ws.Route(ws.DELETE("/{user-id}").To(u.removeUser))
@@ -43,11 +53,19 @@ func (u UserResource) Register(container *restful.Container) {
 	container.Add(ws)
 }
 
-// GET http://localhost:8080/users/1
+// GET http://127.0.0.1:8080/users/test?k1=111&k2=222
+// GET http://127.0.0.1:8080/users/id2/test/user-name?k1=111&k2=222
 func (u UserResource) findUser(request *restful.Request, response *restful.Response) {
-	id := request.PathParameter("user-id")
-	fmt.Println("-------", id)
-	usr := u.users[id]
+	// 获取user-id 和 url 中的变量方法
+	userId := request.PathParameter("user-id")
+	userName := request.PathParameter("user-name")
+	fmt.Println(userId, userName)
+	request.Request.ParseForm()
+	k1 := request.Request.Form.Get("k1")
+	k2 := request.Request.Form.Get("k2")
+	fmt.Println(k1, k2)
+
+	usr := u.users[userId]
 	if len(usr.Id) == 0 {
 		response.AddHeader("Content-Type", "text/plain")
 		response.WriteErrorString(http.StatusNotFound, "User could not be found.")
@@ -56,42 +74,95 @@ func (u UserResource) findUser(request *restful.Request, response *restful.Respo
 	}
 }
 
-// POST http://localhost:8080/users
-// <User><Id>1</Id><Name>Melissa Raspberry</Name></User>
+//PUT http://127.0.0.1:8080/users/test
+//Content-Type: application/json
+//
+//{
+//"name": "caoyingjun",
+//"age": "18"
+//}
 func (u *UserResource) updateUser(request *restful.Request, response *restful.Response) {
 	usr := new(User)
-	err := request.ReadEntity(&usr)
-	if err == nil {
-		u.users[usr.Id] = *usr
-		response.WriteEntity(usr)
-	} else {
-		response.AddHeader("Content-Type", "text/plain")
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+	userId := request.PathParameter("user-id")
+	// 获取 request 里面的 body
+	body := request.Request.Body
+	b3, err := ioutil.ReadAll(body)
+	if err != nil {
+		fmt.Println(err.Error())
+		response.WriteErrorString(http.StatusBadRequest, err.Error())
+		return
 	}
+
+	// 转换给结构体，以便后续使用
+    var rb RequestBody
+	err = json.Unmarshal(b3, &rb)
+	if err != nil {
+		fmt.Println(err.Error())
+		response.WriteErrorString(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	//err = request.ReadEntity(&usr)
+	//if err != nil {
+	//	fmt.Println(err.Error())
+	//	response.WriteErrorString(http.StatusOK, err.Error())
+	//	return
+	//}
+
+	usr.Id = userId
+	usr.Name = rb.Name
+	usr.Age = rb.Age
+
+	u.users[usr.Id] = *usr
+	//response.WriteHeader(http.StatusOK)
+    response.WriteEntity(usr)
 }
 
-// PUT http://localhost:8080/users/1
-// <User><Id>1</Id><Name>Melissa</Name></User>
+//POST http://127.0.0.1:8080/users
+//Content-Type: application/json
+//
+//{
+//"name": "caoyingjun",
+//"age": "18"
+//}
 func (u *UserResource) createUser(request *restful.Request, response *restful.Response) {
-	id := request.PathParameter("user-id")
-	fmt.Println(id)
-	usr := User{Id: request.PathParameter("user-id")}
-	err := request.ReadEntity(&usr)
-	if err == nil {
-		u.users[usr.Id] = usr
-		response.WriteHeader(http.StatusCreated)
-		response.WriteEntity(usr)
-	} else {
-		response.AddHeader("Content-Type", "text/plain")
-		response.WriteErrorString(http.StatusInternalServerError, err.Error())
+	usr := User{
+		Id: request.PathParameter("user-id"),
 	}
+
+	body := request.Request.Body
+	b3, err := ioutil.ReadAll(body)
+	if err != nil {
+		fmt.Println(err.Error())
+		response.WriteErrorString(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// 转换给结构体，以便后续使用
+	var rb RequestBody
+	err = json.Unmarshal(b3, &rb)
+	if err != nil {
+		fmt.Println(err.Error())
+		response.WriteErrorString(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	usr.Id = "test"
+	usr.Name = rb.Name
+	usr.Age = rb.Age
+
+	u.users[usr.Id] = usr
+	// superfluous  多余的设置
+	//response.WriteHeader(200)
+	response.WriteEntity(usr)
 }
 
-// DELETE http://localhost:8080/users/1
+//DELETE  http://127.0.0.1:8080/users/test
 func (u *UserResource) removeUser(request *restful.Request, response *restful.Response) {
 	id := request.PathParameter("user-id")
-	fmt.Println(id)
 	delete(u.users, id)
+	// 设置返回的格式
+	response.WriteEntity(map[string]string{"delete": "true"})
 }
 
 func main() {
