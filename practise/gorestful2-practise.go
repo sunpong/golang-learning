@@ -178,7 +178,6 @@ func main() {
 	// 创建WebService，并将WebService加入到Container中
 	u.Register(wsContainer)
 
-	fmt.Println(wsContainer)
 	log.Printf("start listening on localhost:8080")
 	server := &http.Server{Addr: ":8080", Handler: wsContainer}
 
