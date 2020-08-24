@@ -6,10 +6,11 @@
 3. kubectl plugin [plugins](https://github.com/ahmetb/kubectx)
 1. 容器内部访问 k8s api [参考](https://www.jianshu.com/p/b1a723033a3c)
 2.  k8s 首先看 event 和 ns
-3.  自定义crd开发
+3.  自定义 crd 开发
 4.  k8s ingress 跨域 [ingress](https://blog.csdn.net/u012375924/article/details/94360425)
 5.  K8s pod 出外网
 6.  Docker 集成 ovs [ovs-docs](https://docs.openvswitch.org/en/latest/intro/install/general/#obtaining-open-vswitch-sources)
+7.  学习 loadbalancer 实现 [cloud-provider-openstack](https://github.com/kubernetes/cloud-provider-openstack)
 
 ## Golang
 1. logrus 的使用
@@ -21,3 +22,4 @@
 
 ## docs
 
+TODO
