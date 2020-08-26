@@ -85,13 +85,13 @@ i. 完成 `dnat` 之后，报文完成所有 `PREROUTING` 表，进入 `routerin
 a. 如果配置 `selector`, `DNS` 直接指向后端 `pods`  
 b. 如果未配置 `selector`, `DNS` 指向和 `service` 名称相同的任意后端, 或 externalName 类型的服务
 
-也就是说，无头服务通过 `dns` 的能力实现 `loadbalance` ，不经过 k8s 实现机制，直接将请求转发到后端的 `pod` 上:
-
-`headless service` 对应的 `endpoints`
+3. `headless service` 对应的 `endpoints`
 ![headless](./pictures/headless-service.png)
 
-通过 `nslookup` 解析无头服务域名对应的后端ip
+4. 通过 `nslookup` 解析无头服务域名对应的后端ip
 ![nslookup](./pictures/nslookups.png)
+
+也就是说，无头服务通过 `dns` 的能力实现 `loadbalance` ，不经过 k8s 实现机制，直接将请求转发到后端的 `pod` 上
 
 **NodePort**
 
